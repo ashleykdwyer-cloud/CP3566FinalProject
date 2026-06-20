@@ -1,0 +1,17 @@
+CP3566 — Term Project · STUDENT PACKAGE
+
+This release has two folders:
+  * Instructions/   <- these documents (you are here). Read them first.
+  * starter/        <- the Spring Boot project. OPEN THIS FOLDER IN INTELLIJ IDEA.
+
+Read in this order (everything below is in this Instructions folder, except the starter):
+  1. PROJECT_BRIEF.pdf (or .html)        the assignment: what to build, submit, and how it is graded
+  2. CP3566_Concepts_Explained.html      the ideas behind the project (open in a browser)
+  3. ../starter/                         open this folder in IntelliJ IDEA and Run FraudApplication
+                                         to build the database (see starter/README.md for details)
+  4. STUDENT_REPORT_TEMPLATE.pdf (.html) the 3-page report you fill in and submit
+  5. PROMPTS_TEMPLATE.md                 rename to PROMPTS.md — your MANDATORY GitHub Copilot log
+
+Due: June 15, 2026.
+Submit on D2L: your report + your demo screen recording + a link to your GitHub repo (5–10 commits required).
+GitHub Copilot is the ONLY permitted AI tool. Any other AI = automatic project zero. See the brief.

@@ -1,0 +1,9 @@
+CP3566 — Term Project
+
+This folder has two folders:
+
+  1. Instructions/   Read these first. Start with Instructions/START_HERE.txt.
+
+  2. starter/        The Spring Boot project. Open THIS folder in IntelliJ IDEA
+                     (File > Open > select the "starter" folder), then click the
+                     green Run arrow on FraudApplication. (Needs JDK 21.)

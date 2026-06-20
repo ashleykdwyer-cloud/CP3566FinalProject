@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CP3566 Term Project — Assignment Brief &amp; Specification</title>
+<style>
+  :root{
+    --navy:#1F3864; --ink:#1E2638; --paper:#FBF9F5; --card:#FFFFFF;
+    --muted:#5C6373; --line:#E6E0D5; --amber:#C9892F; --amber-soft:#F6ECD8; --amber-line:#E4C892;
+    --green:#2F7D4F; --green-soft:#E0EFE5;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --serif:Georgia,'Times New Roman',Times,serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.58}
+  .masthead{background:var(--navy);color:#fff;padding:34px 28px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 28px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-line);margin:0 0 9px}
+  .masthead h1{font-family:var(--serif);font-weight:600;font-size:32px;margin:0 0 8px;line-height:1.1}
+  .masthead p{margin:0;color:#D9E0EC;max-width:680px}
+  main{max-width:920px;margin:0 auto;padding:26px 28px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:22px 26px;margin-bottom:18px;box-shadow:0 1px 2px rgba(31,40,60,.05),0 6px 16px rgba(31,40,60,.05)}
+  h2{font-family:var(--serif);color:var(--navy);font-size:22px;margin:0 0 8px;display:flex;gap:11px;align-items:baseline}
+  h2 .num{font-family:var(--mono);font-size:14px;color:var(--amber)}
+  h3{font-family:var(--serif);color:var(--ink);font-size:16.5px;margin:16px 0 3px}
+  h3 .n{font-family:var(--mono);font-size:13px;color:var(--amber);margin-right:7px}
+  p{margin:0 0 11px}
+  strong{color:var(--navy)}
+  code{font-family:var(--mono);font-size:.85em;background:#F1EEE7;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--navy)}
+  ul{margin:6px 0 11px;padding-left:20px}
+  li{margin:3px 0}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:var(--navy);color:#fff;font-size:12.5px}
+  tbody tr:nth-child(even){background:#FAF8F3}
+  .m{font-family:var(--mono);font-weight:600;color:var(--navy)}
+  .fill{background:#fffaf0;border-left:3px solid var(--amber);padding:2px 8px;border-radius:4px;color:#8A5A12}
+  .callout{background:var(--amber-soft);border:1px solid var(--amber-line);border-radius:10px;padding:12px 16px;margin:12px 0;font-size:14.5px;color:#6b4a14}
+  .callout b{color:#8A5A12}
+  .pill{font-family:var(--mono);font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--green-soft);color:var(--green)}
+  .rubric td:first-child{font-weight:600;color:var(--navy)}
+  footer{color:var(--muted);font-family:var(--mono);font-size:12.5px;border-top:1px solid var(--line);margin-top:6px;padding-top:13px}
+  .meta{display:grid;grid-template-columns:130px 1fr;gap:5px 14px;font-size:14.5px}
+  .meta .k{color:var(--muted)}
+  @media print{body{background:#fff;font-size:12px}section{box-shadow:none;break-inside:avoid}.masthead{background:#fff;color:#000;border-bottom:2px solid var(--navy)}.masthead .kicker,.masthead h1,.masthead p{color:#000}}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="wrap">
+    <p class="kicker">CP3566 · Applied Java Programming · Term Project</p>
+    <h1>Fraud Case-Management — Assignment Brief</h1>
+    <p>Read this first. It is the single source of what to build, what to hand in, and how it is marked. Read it alongside the concepts guide.</p>
+  </div>
+</header>
+
+<main>
+
+  <section>
+    <h2><span class="num">0</span>At a glance</h2>
+    <div class="meta">
+      <div class="k">Weight</div><div><strong>35%</strong> of final grade — 20% the working code, 10% the report, 5% the demo recording.</div>
+      <div class="k">Work in</div><div>Individually or in pairs (max 2). In a pair, demo marks split if one partner cannot explain the shared code.</div>
+      <div class="k">Due</div><div><strong>June 15, 2026</strong></div>
+      <div class="k">Submit on D2L</div><div>your 3-page report and your demo recording, plus a link to your GitHub repository (5–10 commits). See &sect;5.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">1</span>The scenario</h2>
+    <p>You work for a bank&rsquo;s fraud team. Money transfers flow in all day, and a few of them are suspicious. Your job is to build the back-office system that <strong>screens every transaction against a set of rules</strong>, <strong>opens a case</strong> when something looks wrong, and lets staff <strong>review and resolve</strong> each case &mdash; keeping a permanent record of every action.</p>
+    <p>You will build it on <strong>Spring Boot</strong> &mdash; the same stack as the in-class JPA &amp; H2 work: a <strong>Spring MVC REST API</strong> for the web layer and <strong>Spring Data JPA</strong> (Hibernate over an embedded H2 database) for persistence. The <code>starter/</code> is a runnable Spring Boot project &mdash; you grow it.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span>What you are given</h2>
+    <ul>
+      <li><strong>The concepts guide</strong> (<code>CP3566_Concepts_Explained.html</code>) &mdash; every idea this project uses, in build order. Read &sect;10 for the short version of this brief.</li>
+      <li><strong>A runnable Spring Boot starter</strong> (<code>starter/</code>) &mdash; the data layer is done for you (the <code>@Entity</code> classes and <code>JpaRepository</code> interfaces), plus a generator that builds the H2 database and fills it with realistic transactions, including planted fraud that trips every rule. You do <em>not</em> create test data by hand.</li>
+      <li><strong>This brief</strong> &mdash; the exact requirements, contract, and rubric.</li>
+      <li><strong>The report template</strong> (<code>STUDENT_REPORT_TEMPLATE.html</code>) &mdash; the 3-page report you fill in.</li>
+    </ul>
+    <p>What is fixed for you: the rules (&sect;4.3), the legal case moves (&sect;4.4), and the REST contract (&sect;4.5). You implement these &mdash; you do not redesign them.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span>Getting started</h2>
+    <p>Build in this order &mdash; each step works before the next:</p>
+    <ul>
+      <li><strong>Run the starter</strong> (<code>./mvnw spring-boot:run</code>) so you have a populated database and the data layer to work against.</li>
+      <li><strong>Study the data layer you were given</strong> &mdash; the <code>@Entity</code> classes and <code>JpaRepository</code> interfaces (&sect;4.1, &sect;4.2).</li>
+      <li><strong>Rule engine</strong> &mdash; prove it opens the right cases from the seeded data (&sect;4.3).</li>
+      <li><strong>REST endpoints</strong> &mdash; wrap the logic in the web layer (&sect;4.5).</li>
+      <li><strong>Security and screen</strong> last (&sect;4.6, &sect;4.7).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span>What to build — the specification</h2>
+
+    <h3><span class="n">4.1</span>Layered architecture</h3>
+    <p>Keep three layers separate; the separation is part of the grade. <strong>Web</strong> (<code>@RestController</code> — take the request, return JSON, no logic) &rarr; <strong>Logic</strong> (<code>@Service</code> — the rule engine and case workflow) &rarr; <strong>Data</strong> (<code>JpaRepository</code> classes — the <em>only</em> code that touches the database; Spring Data writes their SQL).</p>
+
+    <h3><span class="n">4.2</span>Database access</h3>
+    <p>All database access goes through your <strong>Spring Data JPA repositories</strong> &mdash; Hibernate generates <strong>parameterised</strong> SQL, so user input is never glued into a query (safe from SQL injection by default). The repositories are the only classes that touch the database. The rule thresholds live in a <code>rules</code> table (a JPA entity) so an admin can change them without editing code. If you add a custom query, use a derived method or a bound <code>@Query</code> parameter &mdash; never string-concatenate input.</p>
+
+    <h3><span class="n">4.3</span>The rules</h3>
+    <table>
+      <thead><tr><th style="width:80px">Rule</th><th>Fires when</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td class="m">R1</td><td>A single amount is too large.</td><td>amount ≥ $10,000</td></tr>
+        <tr><td class="m">R2</td><td>Too many transactions too fast on one account.</td><td>≥ 5 within 60 min</td></tr>
+        <tr><td class="m">R3</td><td>Counterparty is on the watchlist.</td><td>any match</td></tr>
+        <tr><td class="m">R4 <span class="pill">bonus</span></td><td>Structuring — several amounts just under the limit.</td><td>≥ 3 of $9,000–$9,999 within 24h</td></tr>
+      </tbody>
+    </table>
+    <p>A match raises an alert and opens a <code>NEW</code> case. <strong>R1&ndash;R3 are required; R4 earns bonus marks.</strong></p>
+
+    <h3><span class="n">4.4</span>The case workflow (state machine)</h3>
+    <p>A case is always in one state. <strong>Only these moves are legal</strong> — any other move must be rejected with <span class="m">409</span>, and a user whose role cannot make a legal move gets <span class="m">403</span>.</p>
+    <table>
+      <thead><tr><th>Move</th><th>From → To</th><th>Allowed role</th></tr></thead>
+      <tbody>
+        <tr><td>pickup</td><td>NEW → REVIEWING</td><td>ANALYST</td></tr>
+        <tr><td>escalate</td><td>REVIEWING → ESCALATED</td><td>ANALYST</td></tr>
+        <tr><td>send-back</td><td>ESCALATED → REVIEWING</td><td>INVESTIGATOR</td></tr>
+        <tr><td>close-false</td><td>REVIEWING → CLOSED_FALSE</td><td>ANALYST</td></tr>
+        <tr><td>close-false</td><td>ESCALATED → CLOSED_FALSE</td><td>INVESTIGATOR</td></tr>
+        <tr><td>close-fraud</td><td>ESCALATED → CLOSED_FRAUD</td><td>INVESTIGATOR</td></tr>
+      </tbody>
+    </table>
+
+    <h3><span class="n">4.5</span>The REST endpoints (the contract)</h3>
+    <p>Build exactly these. Return <strong>JSON</strong> and the <strong>correct status code</strong>.</p>
+    <table>
+      <thead><tr><th style="width:70px">Method</th><th>Path</th><th>Who</th><th>Status codes</th></tr></thead>
+      <tbody>
+        <tr><td class="m">POST</td><td><code>/api/login</code></td><td>—</td><td>200, 401</td></tr>
+        <tr><td class="m">GET</td><td><code>/api/cases</code> <span style="color:#5C6373">[?status=]</span></td><td>any</td><td>200</td></tr>
+        <tr><td class="m">GET</td><td><code>/api/cases/{id}</code></td><td>any</td><td>200, 404</td></tr>
+        <tr><td class="m">POST</td><td><code>/api/cases/{id}/pickup</code></td><td>ANALYST</td><td>200, 403, 404, 409</td></tr>
+        <tr><td class="m">POST</td><td><code>/api/cases/{id}/escalate</code></td><td>ANALYST</td><td>200, 403, 404, 409</td></tr>
+        <tr><td class="m">POST</td><td><code>/api/cases/{id}/send-back</code></td><td>INVESTIGATOR</td><td>200, 403, 404, 409</td></tr>
+        <tr><td class="m">POST</td><td><code>/api/cases/{id}/close-false</code></td><td>ANALYST / INVESTIGATOR</td><td>200, 403, 404, 409</td></tr>
+        <tr><td class="m">POST</td><td><code>/api/cases/{id}/close-fraud</code></td><td>INVESTIGATOR</td><td>200, 403, 404, 409</td></tr>
+        <tr><td class="m">POST</td><td><code>/api/cases/{id}/notes</code></td><td>any</td><td>201, 404</td></tr>
+        <tr><td class="m">GET</td><td><code>/api/rules</code></td><td>any</td><td>200</td></tr>
+        <tr><td class="m">PUT</td><td><code>/api/rules/{code}</code></td><td>ADMIN</td><td>200, 403, 404</td></tr>
+      </tbody>
+    </table>
+
+    <h3><span class="n">4.6</span>Security</h3>
+    <p>Two checks, on the server, for every protected action: <strong>login first</strong> (not logged in &rarr; <span class="m">401</span>), then <strong>role</strong> (logged in but not allowed &rarr; <span class="m">403</span>). Roles: <code>ANALYST</code>, <code>INVESTIGATOR</code>, <code>ADMIN</code>.</p>
+    <p>Users sign in with a <strong>username and password</strong>. The starter seeds the users with <strong>hashed</strong> passwords (BCrypt) &mdash; never store a password in plain text &mdash; so your login compares the submitted password against the stored hash; a wrong username <em>or</em> password returns <span class="m">401</span>. The seeded demo logins are listed in the starter README.</p>
+
+    <h3><span class="n">4.7</span>The dashboard (screen)</h3>
+    <p>A simple web page that lists the cases and lets a logged-in user open one and act on it. Use a server-side <strong>Thymeleaf</strong> template or a static HTML + JavaScript page that calls your REST API &mdash; your choice. Keep business logic out of the page.</p>
+
+    <h3><span class="n">4.8</span>The audit log</h3>
+    <p>Every action (a case opened, picked up, escalated, closed, a note added) writes one permanent line: who, what, which case, when.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span>What to hand in</h2>
+    <ul>
+      <li><strong>Your code in a GitHub repository</strong> — builds and runs (<code>./mvnw spring-boot:run</code> against the H2 database the starter creates), implementing &sect;4. The repo must show <strong>5–10 commits</strong> with meaningful messages (steady progress, not one giant commit) and must include your <code>PROMPTS.md</code> log (&sect;7).</li>
+      <li><strong>A 3-page plain-language report</strong> — fill in <code>STUDENT_REPORT_TEMPLATE.html</code>: explain, with no code or jargon, how your project works.</li>
+      <li><strong>A demo screen recording</strong> (≈5–10 min) — run the app and walk one case from New to Closed, explaining each step <em>and</em> how your code works.</li>
+    </ul>
+    <div class="callout"><b>Due: June 15, 2026.</b> On <b>D2L</b>, submit your <b>report</b> and your <b>demo recording</b> (the video file, or a link to it), plus a <b>link to your GitHub repository</b>. The repo must contain your code, your <code>PROMPTS.md</code>, and <b>5–10 commits</b> — a missing or single-commit history loses marks. The commit history together with <code>PROMPTS.md</code> is how we see the work grew over time.</div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span>How it is marked</h2>
+    <p>Each row is marked <strong>Full / Partial / Missing</strong>. The marks equal your percentage of the course: <strong>20 for the working code</strong> (the first four rows), <strong>10 for the report</strong>, <strong>5 for the demo</strong> — 35 total, plus a 2-mark bonus.</p>
+    <table class="rubric">
+      <thead><tr><th style="width:230px">Criterion</th><th>Full marks means</th><th style="width:60px">Marks</th></tr></thead>
+      <tbody>
+        <tr><td>Data layer (Spring Data JPA)</td><td>JPA repositories are the only DB access; queries are parameterised (no string-built SQL).</td><td>5</td></tr>
+        <tr><td>Rule engine (R1–R3)</td><td>Seeded fraud opens the right cases; thresholds read from the DB.</td><td>5</td></tr>
+        <tr><td>Workflow &amp; security</td><td>State machine enforced (409); password login + roles enforced (401/403); audit log written.</td><td>5</td></tr>
+        <tr><td>REST endpoints &amp; status codes</td><td>The &sect;4.5 endpoints return correct JSON and status codes.</td><td>5</td></tr>
+        <tr><td>Project report</td><td>The 3-page plain-language report explains the system clearly.</td><td>10</td></tr>
+        <tr><td>Demo recording</td><td>Screen recording shows the app working end-to-end, with you explaining the code.</td><td>5</td></tr>
+        <tr><td>R4 structuring <span class="pill">bonus</span></td><td>Structuring rule implemented and demonstrated.</td><td>+2</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>PROMPTS.md gate:</b> the four work criteria above (20 marks) are awarded only if a genuine <code>PROMPTS.md</code> log is submitted. A <b>missing or fabricated log makes those 20 marks zero</b>, regardless of how good the code is. The report (10) and demo (5) are marked separately. Using any AI other than GitHub Copilot zeroes the <em>whole</em> project (&sect;7).</div>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span>Using AI tools &amp; academic integrity</h2>
+    <div class="callout"><b>Read this carefully — it is strictly enforced.</b></div>
+    <p><strong>GitHub Copilot (and Copilot Chat) is the only AI assistant you may use.</strong> Copilot is permitted because it works inside the IDE and leaves an auditable trail. Using <strong>any other AI tool</strong> &mdash; ChatGPT, Claude, Gemini, Cursor, or anything similar &mdash; is an <strong>automatic zero on the entire project</strong>: no warnings, no partial credit.</p>
+    <p><strong>Keep a <code>PROMPTS.md</code> log.</strong> Record every significant prompt you gave Copilot and, in a line or two, what you accepted or changed. Submit it with your code. A <strong>missing or fabricated log zeroes the work marks</strong> (the four &sect;6 criteria &mdash; 20 marks); see the gate note in &sect;6.</p>
+    <p><strong>Your demo recording must show you explaining your code, not just clicking through the app.</strong> Walk through how the key parts work and why you wrote them that way. You may also be asked follow-up questions; if you cannot explain your code, you lose marks. For pairs, both partners should narrate, and demo marks are split if one cannot explain the shared code.</p>
+    <footer>CP3566 · Applied Java Programming — Fraud Case-Management term project · assignment brief.</footer>
+  </section>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,6 @@
+target/
+.idea/
+*.iml
+# H2 file-backed database (regenerated on demand — never commit it)
+data.mv.db
+data.trace.db

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CP3566 — Understanding the Project: The Ideas Behind It</title>
+<!-- System font stack — no external font dependencies, fully D2L self-contained -->
+<style>
+  :root{
+    --navy:#1F3864; --ink:#1E2638; --paper:#FBF9F5; --card:#FFFFFF;
+    --muted:#5C6373; --line:#E6E0D5; --line-strong:#D7CFC0;
+    --amber:#C9892F; --amber-soft:#F6ECD8; --amber-line:#E4C892;
+    --red:#B3402E; --red-soft:#F6E2DD; --green:#2F7D4F; --green-soft:#E0EFE5;
+    --shadow:0 1px 2px rgba(31,40,60,.06),0 8px 24px rgba(31,40,60,.06);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .masthead{
+    background:var(--navy); color:#fff; padding:54px 28px 46px;
+    background-image:radial-gradient(circle at 88% -10%,rgba(201,137,47,.28),transparent 42%);
+  }
+  .masthead .wrap{max-width:1160px;margin:0 auto;}
+  .kicker{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#E4C892;margin:0 0 14px;}
+  .masthead h1{font-family:Georgia,'Times New Roman',Times,serif;font-weight:600;font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 16px;letter-spacing:-.01em;}
+  .masthead p{max-width:720px;margin:0;font-size:18px;color:#D9E0EC;}
+
+  .shell{max-width:1160px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:248px 1fr;gap:48px;}
+  nav.toc{position:sticky;top:24px;align-self:start;padding:30px 0 60px;font-size:14.5px;}
+  nav.toc h2{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;}
+  nav.toc a{display:block;color:var(--ink);text-decoration:none;padding:6px 12px;border-left:2px solid var(--line);margin-left:1px;transition:.18s;}
+  nav.toc a:hover{color:var(--navy);border-left-color:var(--amber);background:#fff;}
+  nav.toc a .n{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;color:var(--muted);font-size:12px;margin-right:8px;}
+
+  main{padding:40px 0 90px;min-width:0;}
+  section{margin:0 0 18px;scroll-margin-top:20px;}
+  section.block{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:34px 38px;margin-bottom:30px;box-shadow:var(--shadow);}
+  h2.sec{font-family:Georgia,'Times New Roman',Times,serif;font-weight:600;font-size:30px;line-height:1.1;margin:0 0 6px;color:var(--navy);letter-spacing:-.01em;display:flex;align-items:baseline;gap:14px;}
+  h2.sec .num{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;font-size:15px;color:var(--amber);font-weight:600;}
+  h3{font-family:Georgia,'Times New Roman',Times,serif;font-weight:600;font-size:21px;margin:30px 0 6px;color:var(--ink);}
+  p{margin:0 0 14px;}
+  .lead{font-size:18.5px;color:#33405A;}
+  strong{font-weight:700;color:var(--navy);}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;font-size:.86em;background:#F1EEE7;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--navy);}
+
+  .analogy{display:flex;gap:14px;background:var(--amber-soft);border:1px solid var(--amber-line);border-radius:12px;padding:16px 18px;margin:18px 0;}
+  .analogy .ic{font-size:22px;line-height:1.3;flex:none;}
+  .analogy p{margin:0;font-size:16px;}
+  .analogy b{color:#8A5A12;}
+
+  .applies{border-left:3px solid var(--navy);background:#F4F6FA;border-radius:0 10px 10px 0;padding:14px 18px;margin:18px 0 4px;font-size:16px;}
+  .applies .tag{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);display:block;margin-bottom:5px;font-weight:600;}
+
+  figure{margin:24px 0 6px;}
+  figure svg{width:100%;height:auto;display:block;background:#FCFBF8;border:1px solid var(--line);border-radius:14px;padding:16px;}
+  figcaption{font-size:14px;color:var(--muted);text-align:center;margin-top:10px;font-style:italic;}
+  svg text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0 6px;font-size:15.5px;}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+  thead th{background:var(--navy);color:#fff;font-weight:600;font-size:13.5px;letter-spacing:.02em;}
+  thead th:first-child{border-radius:8px 0 0 0;} thead th:last-child{border-radius:0 8px 0 0;}
+  tbody tr:nth-child(even){background:#FAF8F3;}
+  td .m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;font-weight:600;color:var(--navy);}
+  .pill{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;}
+  .pill.get{background:var(--green-soft);color:var(--green);}
+  .pill.post{background:#E5ECF7;color:var(--navy);}
+  .pill.put{background:var(--amber-soft);color:#8A5A12;}
+  .pill.del{background:var(--red-soft);color:var(--red);}
+
+  .glossary dt{font-weight:700;color:var(--navy);margin-top:12px;font-size:16px;}
+  .glossary dd{margin:2px 0 0;color:#33405A;font-size:16px;}
+
+  footer{border-top:1px solid var(--line);margin-top:30px;padding-top:18px;color:var(--muted);font-size:13.5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;}
+
+  @media (max-width:880px){
+    .shell{grid-template-columns:1fr;gap:0;}
+    nav.toc{display:none;}
+    section.block{padding:26px 22px;}
+  }
+  @media print{
+    body{background:#fff;font-size:12.5px;}
+    .masthead{background:#fff;color:#000;border-bottom:2px solid var(--navy);}
+    .masthead .kicker,.masthead h1,.masthead p{color:#000;}
+    nav.toc{display:none;}
+    .shell{grid-template-columns:1fr;}
+    section.block{box-shadow:none;break-inside:avoid;page-break-inside:avoid;}
+    figure{break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="kicker">CP3566 · Applied Java Programming</p>
+    <h1>Understanding the Project:<br>The Ideas Behind It</h1>
+    <p>Before you write any code, read this. The fraud project uses a few ideas you have not used yet — web servers, Application Programming Interfaces (APIs), layers, logins. This guide explains each one in plain words, with a picture. It follows the same order you will build things in.</p>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="toc">
+    <h2>On this page</h2>
+    <a href="#big"><span class="n">1</span>The big picture</a>
+    <a href="#web"><span class="n">2</span>How the web works</a>
+    <a href="#api"><span class="n">3</span>APIs and REST</a>
+    <a href="#layers"><span class="n">4</span>The layers of your app</a>
+    <a href="#db"><span class="n">5</span>The database and JPA</a>
+    <a href="#auth"><span class="n">6</span>Login vs. permissions</a>
+    <a href="#rules"><span class="n">7</span>The rule engine</a>
+    <a href="#case"><span class="n">8</span>The life of a case</a>
+    <a href="#endtoend"><span class="n">9</span>One action, end to end</a>
+    <a href="#build"><span class="n">10</span>What&rsquo;s given, what to build</a>
+    <a href="#glossary"><span class="n">11</span>Quick glossary</a>
+  </nav>
+
+  <main>
+
+  <!-- 1 -->
+  <section class="block" id="big">
+    <h2 class="sec"><span class="num">01</span>The big picture</h2>
+    <p class="lead">Your whole app is three layers of code sitting between a user and a database. A user (or another program) sends a request in; the app does some work; an answer goes back out. Everything you build fits somewhere in the picture below.</p>
+    <figure>
+      <svg viewBox="0 0 820 300" role="img" aria-label="Block diagram of the whole system">
+        <defs><marker id="arrA" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#5C6373"/></marker></defs>
+        <!-- browser -->
+        <rect x="20" y="112" width="150" height="76" rx="12" fill="#1F3864"/>
+        <text x="95" y="146" text-anchor="middle" fill="#fff" font-size="16" font-weight="600">You</text>
+        <text x="95" y="167" text-anchor="middle" fill="#CFE" font-size="13" style="fill:#CBD6E8">(web browser)</text>
+        <line x1="170" y1="150" x2="246" y2="150" stroke="#5C6373" stroke-width="2" marker-end="url(#arrA)"/>
+        <line x1="246" y1="170" x2="174" y2="170" stroke="#9AA1AE" stroke-width="2" marker-end="url(#arrA)" stroke-dasharray="5 4"/>
+        <text x="208" y="142" text-anchor="middle" fill="#5C6373" font-size="11.5">request</text>
+        <text x="208" y="186" text-anchor="middle" fill="#9AA1AE" font-size="11.5">answer</text>
+        <!-- app container -->
+        <rect x="252" y="40" width="330" height="222" rx="14" fill="#fff" stroke="#1F3864" stroke-width="1.5"/>
+        <text x="417" y="64" text-anchor="middle" fill="#1F3864" font-size="14" font-weight="700">YOUR JAVA WEB APP</text>
+        <rect x="272" y="78" width="290" height="48" rx="9" fill="#F6ECD8" stroke="#E4C892"/>
+        <text x="417" y="100" text-anchor="middle" fill="#8A5A12" font-size="14.5" font-weight="600">Pages &amp; API</text>
+        <text x="417" y="117" text-anchor="middle" fill="#8A5A12" font-size="11.5">what you talk to</text>
+        <rect x="272" y="132" width="290" height="48" rx="9" fill="#fff" stroke="#D7CFC0"/>
+        <text x="417" y="153" text-anchor="middle" fill="#1F3864" font-size="14.5" font-weight="600">Logic</text>
+        <text x="417" y="170" text-anchor="middle" fill="#5C6373" font-size="11.5">rules · workflow · logging</text>
+        <rect x="272" y="186" width="290" height="48" rx="9" fill="#fff" stroke="#D7CFC0"/>
+        <text x="417" y="207" text-anchor="middle" fill="#1F3864" font-size="14.5" font-weight="600">Database code</text>
+        <text x="417" y="224" text-anchor="middle" fill="#5C6373" font-size="11.5">reads &amp; writes</text>
+        <line x1="582" y1="150" x2="652" y2="150" stroke="#5C6373" stroke-width="2" marker-end="url(#arrA)"/>
+        <!-- database cylinder -->
+        <ellipse cx="722" cy="116" rx="58" ry="14" fill="#1F3864"/>
+        <rect x="664" y="116" width="116" height="70" fill="#1F3864"/>
+        <ellipse cx="722" cy="186" rx="58" ry="14" fill="#163052"/>
+        <ellipse cx="722" cy="116" rx="58" ry="14" fill="#2A4C7C"/>
+        <text x="722" y="158" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">Database</text>
+      </svg>
+      <figcaption>The request goes left to right; the answer comes back. The three boxes inside the app are the layers you will keep separate in your code.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 2 -->
+  <section class="block" id="web">
+    <h2 class="sec"><span class="num">02</span>How the web works</h2>
+    <p class="lead">Every web app is two halves talking to each other: a <strong>client</strong> (the browser) and a <strong>server</strong> (your app, running on a computer somewhere). They talk in a strict back-and-forth.</p>
+    <p>The client sends a <strong>request</strong> — basically &ldquo;please do this&rdquo;. The server sends back a <strong>response</strong> — the result, plus a small <strong>status number</strong> that says whether it worked. The language they speak is called <strong>HTTP</strong> — short for Hypertext Transfer Protocol. That is all &ldquo;the web&rdquo; really is: requests going one way, responses coming back.</p>
+    <div class="analogy"><span class="ic">📮</span><p><b>Think of posting a letter.</b> You send a request (the letter asks for something). Later you get a reply. You never walk into the post office and sort the mail yourself — you only send and receive. The browser and server work the same way.</p></div>
+    <figure>
+      <svg viewBox="0 0 820 250" role="img" aria-label="Client and server exchanging a request and response">
+        <defs><marker id="arrB" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#1F3864"/></marker>
+        <marker id="arrBg" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#2F7D4F"/></marker></defs>
+        <rect x="34" y="78" width="180" height="94" rx="12" fill="#fff" stroke="#1F3864" stroke-width="1.5"/>
+        <text x="124" y="118" text-anchor="middle" fill="#1F3864" font-size="17" font-weight="700">Client</text>
+        <text x="124" y="140" text-anchor="middle" fill="#5C6373" font-size="13">the web browser</text>
+        <rect x="606" y="78" width="180" height="94" rx="12" fill="#1F3864"/>
+        <text x="696" y="118" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">Server</text>
+        <text x="696" y="140" text-anchor="middle" fill="#CBD6E8" font-size="13">your app</text>
+        <!-- request -->
+        <line x1="214" y1="108" x2="604" y2="108" stroke="#1F3864" stroke-width="2.5" marker-end="url(#arrB)"/>
+        <rect x="300" y="84" width="220" height="22" rx="6" fill="#F6ECD8" stroke="#E4C892"/>
+        <text x="410" y="99" text-anchor="middle" fill="#8A5A12" font-size="12.5" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace">Request: GET /api/cases</text>
+        <!-- response -->
+        <line x1="604" y1="146" x2="216" y2="146" stroke="#2F7D4F" stroke-width="2.5" marker-end="url(#arrBg)"/>
+        <rect x="276" y="150" width="268" height="22" rx="6" fill="#E0EFE5" stroke="#9FCBB0"/>
+        <text x="410" y="165" text-anchor="middle" fill="#2F7D4F" font-size="12.5" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace">Response: list of cases · status 200</text>
+        <!-- animated packets: request flows out, response flows back -->
+        <circle r="6" cy="108" fill="#C9892F">
+          <animate attributeName="cx" values="222;596" dur="2.4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.85;1" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="6" cy="146" fill="#2F7D4F">
+          <animate attributeName="cx" values="596;222" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.85;1" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+      <figcaption>One request out, one response back. The status number (200) means &ldquo;it worked.&rdquo;</figcaption>
+    </figure>
+  </section>
+
+  <!-- 3 -->
+  <section class="block" id="api">
+    <h2 class="sec"><span class="num">03</span>APIs and REST</h2>
+
+    <h3>What is an API?</h3>
+    <p class="lead">An <strong>API</strong> is a fixed list of things one program will let another program ask it to do. Nothing more. It is a doorway with a set menu.</p>
+    <div class="analogy"><span class="ic">🍽️</span><p><b>Think of a restaurant.</b> You don&rsquo;t walk into the kitchen and cook. You read the <b>menu</b> (the fixed list of things you can order), tell the waiter, and the food comes back. The menu is the API: it&rsquo;s the agreed list of requests you&rsquo;re allowed to make, and what you&rsquo;ll get back. You don&rsquo;t need to know how the kitchen works.</p></div>
+    <p>In your project, the &ldquo;kitchen&rdquo; is your app and its database. The <strong>API is the menu of actions</strong> you let others use: list the cases, open a case, add a note, close a case. A program (or your own web pages) places an order; your app does the work and sends back the result.</p>
+
+    <h3>What is a REST API?</h3>
+    <p><strong>REST</strong> — short for Representational State Transfer — is just the most common <em>style</em> of web API. It has two simple ideas:</p>
+    <p><strong>1. Web addresses name the things.</strong> Each kind of thing gets an address. In your app, <code>/api/cases</code> means &ldquo;the cases&rdquo; and <code>/api/cases/42</code> means &ldquo;case number 42.&rdquo;</p>
+    <p><strong>2. HTTP methods say what to do</strong> with that thing. The method is the verb; the address is the noun. &ldquo;<code>GET</code> the cases&rdquo; means read them. &ldquo;<code>POST</code> a case&rdquo; means create one.</p>
+    <table>
+      <thead><tr><th style="width:140px">Method (verb)</th><th>What it means</th><th>Example in your app</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill get">GET</span></td><td>Read / fetch something. Changes nothing.</td><td><code>GET /api/cases</code> — list the cases</td></tr>
+        <tr><td><span class="pill post">POST</span></td><td>Create something new, or run an action.</td><td><code>POST /api/cases/42/notes</code> — add a note</td></tr>
+        <tr><td><span class="pill put">PUT</span></td><td>Change something that already exists.</td><td><code>PUT /api/rules</code> — change the rule numbers</td></tr>
+        <tr><td><span class="pill del">DELETE</span></td><td>Remove something.</td><td><code>DELETE /api/watchlist/7</code> — remove an entry</td></tr>
+      </tbody>
+    </table>
+
+    <h3>What comes back: JSON</h3>
+    <p>When your API answers, it usually sends the data as <strong>JSON</strong> — short for JavaScript Object Notation, a simple text format of names and values that any program can read. For one case it might look like <code>{ "id": 42, "status": "Escalated", "amount": 12000 }</code>. You do not have to design JSON by hand; your framework turns your Java objects into JSON for you.</p>
+
+    <h3>The status number</h3>
+    <p>Every response carries a 3-digit <strong>status code</strong> that says how it went. You must send the right one — the marker checks for this.</p>
+    <table>
+      <thead><tr><th style="width:90px">Code</th><th>Meaning</th><th>When you send it</th></tr></thead>
+      <tbody>
+        <tr><td><span class="m">200</span></td><td>OK</td><td>It worked (a read or an action succeeded).</td></tr>
+        <tr><td><span class="m">201</span></td><td>Created</td><td>You made something new (a note, a transaction).</td></tr>
+        <tr><td><span class="m">400</span></td><td>Bad request</td><td>The data they sent was broken or missing.</td></tr>
+        <tr><td><span class="m">401</span></td><td>Not logged in</td><td>They have not logged in yet.</td></tr>
+        <tr><td><span class="m">403</span></td><td>Not allowed</td><td>They are logged in, but their role can&rsquo;t do this.</td></tr>
+        <tr><td><span class="m">404</span></td><td>Not found</td><td>The thing they asked for doesn&rsquo;t exist.</td></tr>
+        <tr><td><span class="m">409</span></td><td>Conflict</td><td>They tried a move that isn&rsquo;t allowed (e.g. an illegal case step).</td></tr>
+      </tbody>
+    </table>
+    <div class="applies"><span class="tag">In your project</span>Section 4.5 of the spec lists the exact addresses and methods you must build. Now you can read that table: <code>POST /api/cases/{id}/escalate</code> means &ldquo;run the escalate action on this one case.&rdquo;</div>
+  </section>
+
+  <!-- 4 -->
+  <section class="block" id="layers">
+    <h2 class="sec"><span class="num">04</span>The layers of your app</h2>
+    <p class="lead">A good app is not one big pile of code. It is split into <strong>layers</strong>, each with one job. A request travels down through the layers and the answer travels back up. This keeps the &ldquo;thinking&rdquo; separate from the &ldquo;pages&rdquo; and from the &ldquo;database code,&rdquo; so each part stays simple.</p>
+    <figure>
+      <svg viewBox="0 0 820 430" role="img" aria-label="The layers of the application from browser down to database">
+        <defs><marker id="arrD" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#5C6373"/></marker>
+        <marker id="arrDg" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#9AA1AE"/></marker></defs>
+        <!-- layer boxes -->
+        <rect x="210" y="20" width="400" height="56" rx="11" fill="#1F3864"/>
+        <text x="410" y="44" text-anchor="middle" fill="#fff" font-size="15.5" font-weight="600">Browser  /  another program</text>
+        <text x="410" y="63" text-anchor="middle" fill="#CBD6E8" font-size="12">sends requests, shows answers</text>
+
+        <rect x="160" y="106" width="500" height="62" rx="11" fill="#F6ECD8" stroke="#E4C892" stroke-width="1.5"/>
+        <text x="410" y="131" text-anchor="middle" fill="#8A5A12" font-size="15.5" font-weight="700">Presentation — Pages &amp; Controllers</text>
+        <text x="410" y="150" text-anchor="middle" fill="#8A5A12" font-size="12.5">takes the request, sends the response. No thinking here.</text>
+
+        <rect x="160" y="198" width="500" height="62" rx="11" fill="#fff" stroke="#1F3864" stroke-width="1.5"/>
+        <text x="410" y="223" text-anchor="middle" fill="#1F3864" font-size="15.5" font-weight="700">Logic — Services</text>
+        <text x="410" y="242" text-anchor="middle" fill="#5C6373" font-size="12.5">the rule engine, the case workflow, the logging — the real work</text>
+
+        <rect x="160" y="290" width="500" height="62" rx="11" fill="#fff" stroke="#D7CFC0" stroke-width="1.5"/>
+        <text x="410" y="315" text-anchor="middle" fill="#1F3864" font-size="15.5" font-weight="700">Database code — Repositories</text>
+        <text x="410" y="334" text-anchor="middle" fill="#5C6373" font-size="12.5">the only layer that reads and writes the database</text>
+
+        <!-- db -->
+        <ellipse cx="410" cy="384" rx="74" ry="13" fill="#2A4C7C"/>
+        <rect x="336" y="384" width="148" height="34" fill="#1F3864"/>
+        <ellipse cx="410" cy="418" rx="74" ry="13" fill="#163052"/>
+        <text x="410" y="406" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">Database</text>
+
+        <!-- down/up arrows -->
+        <line x1="300" y1="78" x2="300" y2="104" stroke="#5C6373" stroke-width="2" marker-end="url(#arrD)"/>
+        <line x1="300" y1="170" x2="300" y2="196" stroke="#5C6373" stroke-width="2" marker-end="url(#arrD)"/>
+        <line x1="300" y1="262" x2="300" y2="288" stroke="#5C6373" stroke-width="2" marker-end="url(#arrD)"/>
+        <line x1="300" y1="354" x2="300" y2="372" stroke="#5C6373" stroke-width="2" marker-end="url(#arrD)"/>
+        <line x1="520" y1="372" x2="520" y2="356" stroke="#9AA1AE" stroke-width="2" marker-end="url(#arrDg)" stroke-dasharray="5 4"/>
+        <line x1="520" y1="288" x2="520" y2="264" stroke="#9AA1AE" stroke-width="2" marker-end="url(#arrDg)" stroke-dasharray="5 4"/>
+        <line x1="520" y1="196" x2="520" y2="172" stroke="#9AA1AE" stroke-width="2" marker-end="url(#arrDg)" stroke-dasharray="5 4"/>
+        <line x1="520" y1="104" x2="520" y2="80" stroke="#9AA1AE" stroke-width="2" marker-end="url(#arrDg)" stroke-dasharray="5 4"/>
+        <text x="690" y="138" fill="#5C6373" font-size="12" transform="rotate(90 690 138)">request goes down</text>
+        <text x="128" y="300" fill="#9AA1AE" font-size="12" transform="rotate(-90 128 300)">answer comes up</text>
+      </svg>
+      <figcaption>Each layer only talks to the one below it. Your rules and workflow live in the middle layer — never in the pages or the database code.</figcaption>
+    </figure>
+    <div class="analogy"><span class="ic">🏛️</span><p><b>You may hear the name &ldquo;MVC.&rdquo;</b> It is the same idea with three words: the <b>View</b> is what the user sees (the pages), the <b>Controller</b> takes the request and decides what to do, and the <b>Model</b> is the data. Keeping them apart is exactly what the layers above do.</p></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="block" id="db">
+    <h2 class="sec"><span class="num">05</span>The database and JPA</h2>
+    <p class="lead">Your app forgets everything the moment it stops running — unless it saves things in a <strong>database</strong>. The database is where your transactions, cases, notes, and log lines actually live.</p>
+    <p>Instead of writing SQL by hand, this project talks to the database through <strong>JPA</strong> — the Jakarta Persistence API — using <strong>Spring Data</strong>. You mark a class <code>@Entity</code> and declare a <strong>repository</strong> interface; the framework (<strong>Hibernate</strong>) writes the SQL and turns rows into objects for you. You met databases in the prerequisite course; JPA is the modern way Java reaches them — under the hood it still uses JDBC, but you don&rsquo;t write that plumbing.</p>
+    <h3>Parameterised queries — safe by default</h3>
+    <p>When a query uses a value that came from outside (a username, an amount), that value must never be glued straight into the text of the query. With JPA you get this for free: the repository methods (and any <code>@Query</code> you write with bound parameters) send the value <strong>separately</strong> from the query — a <strong>parameterised query</strong>.</p>
+    <div class="analogy"><span class="ic">🛡️</span><p><b>Why it matters.</b> If user input is pasted into your query text, a clever user can type something that changes what the query does — this attack is called <b>SQL injection</b> (SQL is short for Structured Query Language), and it can hand over your whole database. Letting JPA bind parameters closes that door. The rule: use the repositories, and if you ever write a custom query, bind its parameters — never build SQL by joining strings. The spec requires this; skipping it loses marks.</p></div>
+  </section>
+
+  <!-- 6 -->
+  <section class="block" id="auth">
+    <h2 class="sec"><span class="num">06</span>Login vs. permissions</h2>
+    <p class="lead">Two different checks guard your app, and people mix them up. <strong>Logging in</strong> answers &ldquo;<em>who are you?</em>&rdquo; <strong>Permissions</strong> answer &ldquo;<em>what are you allowed to do?</em>&rdquo; You need both, and they happen in that order.</p>
+    <p>The proper names are <strong>authentication</strong> (who you are — the login) and <strong>authorisation</strong> (what your role may do). An analyst is <em>authenticated</em> when they log in, but they are <em>not authorised</em> to confirm fraud.</p>
+    <p>One rule about the login itself: <strong>never store passwords as plain text</strong>. Store a one-way <strong>hash</strong> of each password; when someone signs in, hash what they typed and compare it to the stored hash. The starter already does this for you (with the standard <strong>BCrypt</strong> function), so a wrong password is rejected with <span class="m">401</span> — the same code as &ldquo;not logged in.&rdquo;</p>
+    <figure>
+      <svg viewBox="0 0 820 250" role="img" aria-label="Flowchart of the login and permission checks">
+        <defs><marker id="arrE" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#5C6373"/></marker></defs>
+        <!-- start -->
+        <rect x="20" y="98" width="120" height="54" rx="27" fill="#1F3864"/>
+        <text x="80" y="123" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Request</text>
+        <text x="80" y="140" text-anchor="middle" fill="#CBD6E8" font-size="11">comes in</text>
+        <line x1="140" y1="125" x2="186" y2="125" stroke="#5C6373" stroke-width="2" marker-end="url(#arrE)"/>
+        <!-- diamond 1 -->
+        <polygon points="260,80 330,125 260,170 190,125" fill="#fff" stroke="#1F3864" stroke-width="1.5"/>
+        <text x="260" y="121" text-anchor="middle" fill="#1F3864" font-size="12.5" font-weight="600">Logged</text>
+        <text x="260" y="137" text-anchor="middle" fill="#1F3864" font-size="12.5" font-weight="600">in?</text>
+        <text x="232" y="74" text-anchor="middle" fill="#8A5A12" font-size="11">authentication</text>
+        <!-- no 1 -->
+        <line x1="260" y1="170" x2="260" y2="206" stroke="#5C6373" stroke-width="2" marker-end="url(#arrE)"/>
+        <text x="272" y="190" fill="#B3402E" font-size="11.5" font-weight="600">no</text>
+        <rect x="196" y="206" width="128" height="34" rx="8" fill="#F6E2DD" stroke="#D8A99E"/>
+        <text x="260" y="228" text-anchor="middle" fill="#B3402E" font-size="12.5" font-weight="600">401 — please log in</text>
+        <!-- yes 1 -->
+        <line x1="330" y1="125" x2="396" y2="125" stroke="#5C6373" stroke-width="2" marker-end="url(#arrE)"/>
+        <text x="360" y="117" fill="#2F7D4F" font-size="11.5" font-weight="600">yes</text>
+        <!-- diamond 2 -->
+        <polygon points="470,80 540,125 470,170 400,125" fill="#fff" stroke="#1F3864" stroke-width="1.5"/>
+        <text x="470" y="121" text-anchor="middle" fill="#1F3864" font-size="12.5" font-weight="600">Role</text>
+        <text x="470" y="137" text-anchor="middle" fill="#1F3864" font-size="12.5" font-weight="600">allowed?</text>
+        <text x="470" y="74" text-anchor="middle" fill="#8A5A12" font-size="11">authorisation</text>
+        <!-- no 2 -->
+        <line x1="470" y1="170" x2="470" y2="206" stroke="#5C6373" stroke-width="2" marker-end="url(#arrE)"/>
+        <text x="482" y="190" fill="#B3402E" font-size="11.5" font-weight="600">no</text>
+        <rect x="406" y="206" width="128" height="34" rx="8" fill="#F6E2DD" stroke="#D8A99E"/>
+        <text x="470" y="228" text-anchor="middle" fill="#B3402E" font-size="12.5" font-weight="600">403 — not allowed</text>
+        <!-- yes 2 -->
+        <line x1="540" y1="125" x2="606" y2="125" stroke="#5C6373" stroke-width="2" marker-end="url(#arrE)"/>
+        <text x="572" y="117" fill="#2F7D4F" font-size="11.5" font-weight="600">yes</text>
+        <rect x="610" y="98" width="170" height="54" rx="11" fill="#E0EFE5" stroke="#9FCBB0"/>
+        <text x="695" y="122" text-anchor="middle" fill="#2F7D4F" font-size="13.5" font-weight="700">Do the action</text>
+        <text x="695" y="140" text-anchor="middle" fill="#2F7D4F" font-size="11">200 OK</text>
+      </svg>
+      <figcaption>Both gates must open. Check login first, then the role — on the server, for every protected action.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 7 -->
+  <section class="block" id="rules">
+    <h2 class="sec"><span class="num">07</span>The rule engine</h2>
+    <p class="lead">This is the heart of the project. When a transaction is saved, your app runs it past a short list of <strong>rules</strong>. Each rule is a plain check. If any rule matches, the transaction is suspicious: the app raises an <strong>alert</strong> and opens a <strong>case</strong> for a person to look at.</p>
+    <p>The rules are simple on purpose — is the amount too big, are there too many transactions too fast, is the name on the watchlist. There is no &ldquo;smart&rdquo; guessing involved.</p>
+    <figure>
+      <svg viewBox="0 0 820 270" role="img" aria-label="Flowchart of a transaction being checked by the rules">
+        <defs><marker id="arrF" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#5C6373"/></marker></defs>
+        <rect x="24" y="104" width="132" height="58" rx="11" fill="#1F3864"/>
+        <text x="90" y="129" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">New</text>
+        <text x="90" y="147" text-anchor="middle" fill="#CBD6E8" font-size="12">transaction</text>
+        <line x1="156" y1="133" x2="198" y2="133" stroke="#5C6373" stroke-width="2" marker-end="url(#arrF)"/>
+        <rect x="202" y="100" width="150" height="66" rx="11" fill="#F6ECD8" stroke="#E4C892"/>
+        <text x="277" y="127" text-anchor="middle" fill="#8A5A12" font-size="13" font-weight="600">Check the rules</text>
+        <text x="277" y="146" text-anchor="middle" fill="#8A5A12" font-size="11.5">R1 · R2 · R3</text>
+        <line x1="352" y1="133" x2="392" y2="133" stroke="#5C6373" stroke-width="2" marker-end="url(#arrF)"/>
+        <!-- decision -->
+        <polygon points="470,86 548,133 470,180 392,133" fill="#fff" stroke="#1F3864" stroke-width="1.5"/>
+        <text x="470" y="129" text-anchor="middle" fill="#1F3864" font-size="12.5" font-weight="600">Any rule</text>
+        <text x="470" y="145" text-anchor="middle" fill="#1F3864" font-size="12.5" font-weight="600">match?</text>
+        <!-- no -->
+        <line x1="470" y1="180" x2="470" y2="222" stroke="#5C6373" stroke-width="2" marker-end="url(#arrF)"/>
+        <text x="482" y="205" fill="#5C6373" font-size="11.5" font-weight="600">no</text>
+        <rect x="396" y="222" width="148" height="34" rx="8" fill="#EFEDE7" stroke="#D7CFC0"/>
+        <text x="470" y="244" text-anchor="middle" fill="#5C6373" font-size="12.5" font-weight="600">nothing happens</text>
+        <!-- yes -->
+        <line x1="548" y1="133" x2="590" y2="133" stroke="#5C6373" stroke-width="2" marker-end="url(#arrF)"/>
+        <text x="568" y="125" fill="#2F7D4F" font-size="11.5" font-weight="600">yes</text>
+        <rect x="594" y="64" width="200" height="44" rx="10" fill="#F6E2DD" stroke="#D8A99E"/>
+        <text x="694" y="91" text-anchor="middle" fill="#B3402E" font-size="13" font-weight="700">Raise an alert</text>
+        <line x1="694" y1="108" x2="694" y2="124" stroke="#5C6373" stroke-width="2" marker-end="url(#arrF)"/>
+        <rect x="594" y="124" width="200" height="44" rx="10" fill="#fff" stroke="#1F3864" stroke-width="1.5"/>
+        <text x="694" y="151" text-anchor="middle" fill="#1F3864" font-size="13" font-weight="600">Open a case (New)</text>
+        <line x1="694" y1="168" x2="694" y2="184" stroke="#5C6373" stroke-width="2" marker-end="url(#arrF)"/>
+        <rect x="594" y="184" width="200" height="40" rx="10" fill="#E5ECF7" stroke="#A9BEDD"/>
+        <text x="694" y="209" text-anchor="middle" fill="#1F3864" font-size="12.5" font-weight="600">Write it to the log</text>
+        <!-- animated: transaction flows into the rules, alert pulses, outcome cascades down -->
+        <circle r="6" cy="133" fill="#1F3864">
+          <animate attributeName="cx" values="158;462" dur="2.6s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="2.6s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="594" y="64" width="200" height="44" rx="10" fill="none" stroke="#B3402E">
+          <animate attributeName="stroke-opacity" values="0;0.95;0" dur="1.7s" repeatCount="indefinite"/>
+          <animate attributeName="stroke-width" values="1.5;5;1.5" dur="1.7s" repeatCount="indefinite"/>
+        </rect>
+        <circle r="5" cx="694" fill="#B3402E">
+          <animate attributeName="cy" values="110;200" dur="2.2s" begin="1s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.85;1" dur="2.2s" begin="1s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+      <figcaption>Every transaction is checked. A match becomes an alert, then a fresh case, and the action is logged.</figcaption>
+    </figure>
+    <div class="applies"><span class="tag">In your project</span>The rule numbers (the dollar limit, the time window) live in the database so an admin can change them. Do not hard-code them. The optional R4 &ldquo;splitting up&rdquo; rule earns bonus marks.</div>
+  </section>
+
+  <!-- 8 -->
+  <section class="block" id="case">
+    <h2 class="sec"><span class="num">08</span>The life of a case</h2>
+    <p class="lead">A case is never just &ldquo;open&rdquo; or &ldquo;closed.&rdquo; It moves through a fixed set of <strong>stages</strong>, and only certain moves are allowed. Your app must <strong>refuse any move that isn&rsquo;t on this map</strong> and answer with an error (status 409) instead of allowing it.</p>
+    <figure>
+      <svg viewBox="0 0 820 330" role="img" aria-label="State diagram showing the allowed moves of a case">
+        <defs><marker id="arrG" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#5C6373"/></marker></defs>
+        <!-- New -->
+        <rect x="30" y="40" width="150" height="58" rx="12" fill="#EFEDE7" stroke="#C9C0AE" stroke-width="1.5"/>
+        <text x="105" y="68" text-anchor="middle" fill="#3A4254" font-size="15" font-weight="700">New</text>
+        <text x="105" y="86" text-anchor="middle" fill="#5C6373" font-size="11.5">just opened</text>
+        <!-- Being reviewed -->
+        <rect x="320" y="40" width="170" height="58" rx="12" fill="#F6ECD8" stroke="#E4C892" stroke-width="1.5"/>
+        <text x="405" y="68" text-anchor="middle" fill="#8A5A12" font-size="15" font-weight="700">Being reviewed</text>
+        <text x="405" y="86" text-anchor="middle" fill="#8A5A12" font-size="11.5">an analyst has it</text>
+        <!-- Escalated -->
+        <rect x="630" y="40" width="160" height="58" rx="12" fill="#F6E2DD" stroke="#D8A99E" stroke-width="1.5"/>
+        <text x="710" y="68" text-anchor="middle" fill="#B3402E" font-size="15" font-weight="700">Escalated</text>
+        <text x="710" y="86" text-anchor="middle" fill="#B3402E" font-size="11.5">sent to investigator</text>
+        <!-- Closed false alarm -->
+        <rect x="300" y="232" width="210" height="58" rx="12" fill="#E0EFE5" stroke="#9FCBB0" stroke-width="1.5"/>
+        <text x="405" y="260" text-anchor="middle" fill="#2F7D4F" font-size="14.5" font-weight="700">Closed — false alarm</text>
+        <text x="405" y="278" text-anchor="middle" fill="#2F7D4F" font-size="11.5">nothing wrong</text>
+        <!-- Closed fraud -->
+        <rect x="600" y="232" width="210" height="58" rx="12" fill="#B3402E"/>
+        <text x="705" y="260" text-anchor="middle" fill="#fff" font-size="14.5" font-weight="700">Closed — real fraud</text>
+        <text x="705" y="278" text-anchor="middle" fill="#F3D6CF" font-size="11.5">confirmed</text>
+
+        <!-- New -> Being reviewed -->
+        <line x1="180" y1="69" x2="316" y2="69" stroke="#5C6373" stroke-width="2" marker-end="url(#arrG)"/>
+        <text x="248" y="60" text-anchor="middle" fill="#5C6373" font-size="11">analyst picks up</text>
+        <!-- Being reviewed -> Escalated -->
+        <line x1="490" y1="62" x2="626" y2="62" stroke="#5C6373" stroke-width="2" marker-end="url(#arrG)"/>
+        <text x="558" y="53" text-anchor="middle" fill="#5C6373" font-size="11">analyst escalates</text>
+        <!-- Escalated -> Being reviewed (back) -->
+        <line x1="626" y1="82" x2="492" y2="82" stroke="#9AA1AE" stroke-width="2" marker-end="url(#arrG)" stroke-dasharray="5 4"/>
+        <text x="558" y="98" text-anchor="middle" fill="#9AA1AE" font-size="11">sends back</text>
+        <!-- Being reviewed -> Closed false alarm -->
+        <line x1="405" y1="98" x2="405" y2="228" stroke="#5C6373" stroke-width="2" marker-end="url(#arrG)"/>
+        <text x="415" y="170" fill="#5C6373" font-size="11">analyst: false alarm</text>
+        <!-- Escalated -> Closed fraud -->
+        <line x1="710" y1="98" x2="708" y2="228" stroke="#5C6373" stroke-width="2" marker-end="url(#arrG)"/>
+        <text x="720" y="170" fill="#5C6373" font-size="11">investigator: fraud</text>
+        <!-- Escalated -> Closed false alarm (diagonal) -->
+        <line x1="640" y1="92" x2="500" y2="232" stroke="#5C6373" stroke-width="2" marker-end="url(#arrG)"/>
+        <text x="600" y="170" fill="#5C6373" font-size="11" transform="rotate(45 600 170)">or false alarm</text>
+        <!-- animated token: a case travels the happy path, pausing at each state -->
+        <circle r="7" fill="#1F3864" stroke="#fff" stroke-width="2">
+          <animateMotion dur="7s" repeatCount="indefinite" calcMode="linear"
+            keyTimes="0;0.26;0.40;0.66;0.80;0.94;1" keyPoints="0;0.38;0.38;0.76;0.76;1;1"
+            path="M105,69 L405,69 L710,69 L705,261"/>
+          <animate attributeName="opacity" values="0;1;1;1;1;1;0" keyTimes="0;0.05;0.3;0.5;0.7;0.95;1" dur="7s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+      <figcaption>Solid arrows are the normal path; the dashed arrow sends a case back. Any move not drawn here must be rejected.</figcaption>
+    </figure>
+    <div class="analogy"><span class="ic">🚦</span><p><b>This is called a &ldquo;state machine.&rdquo;</b> The case is always in exactly one state, and the arrows are the only legal exits. Your code&rsquo;s job is to check, before every move, that the arrow exists — and that the person&rsquo;s role is allowed to take it.</p></div>
+  </section>
+
+  <!-- 9 -->
+  <section class="block" id="endtoend">
+    <h2 class="sec"><span class="num">09</span>One action, end to end</h2>
+    <p class="lead">Here is everything working together for a single click. An analyst presses <strong>&ldquo;Escalate&rdquo;</strong> on case 42. Follow the numbers down through the layers and back up.</p>
+    <figure>
+      <svg viewBox="0 0 820 360" role="img" aria-label="Sequence of one escalate action through the layers">
+        <defs><marker id="arrH" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#1F3864"/></marker></defs>
+        <!-- lifelines headers -->
+        <rect x="20" y="20" width="120" height="40" rx="9" fill="#1F3864"/><text x="80" y="45" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="600">Browser</text>
+        <rect x="200" y="20" width="120" height="40" rx="9" fill="#C9892F"/><text x="260" y="45" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="600">Controller</text>
+        <rect x="380" y="20" width="120" height="40" rx="9" fill="#2A4C7C"/><text x="440" y="45" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="600">Service</text>
+        <rect x="560" y="20" width="110" height="40" rx="9" fill="#1F3864"/><text x="615" y="45" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="600">Database</text>
+        <rect x="700" y="20" width="100" height="40" rx="9" fill="#163052"/><text x="750" y="45" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="600">Log</text>
+        <!-- lifelines -->
+        <line x1="80" y1="60" x2="80" y2="340" stroke="#D7CFC0" stroke-width="1.5"/>
+        <line x1="260" y1="60" x2="260" y2="340" stroke="#D7CFC0" stroke-width="1.5"/>
+        <line x1="440" y1="60" x2="440" y2="340" stroke="#D7CFC0" stroke-width="1.5"/>
+        <line x1="615" y1="60" x2="615" y2="340" stroke="#D7CFC0" stroke-width="1.5"/>
+        <line x1="750" y1="60" x2="750" y2="340" stroke="#D7CFC0" stroke-width="1.5"/>
+        <!-- animated sweep: a soft highlight follows the numbered steps down -->
+        <rect x="20" y="78" width="780" height="26" rx="6" fill="#C9892F" opacity="0.13">
+          <animate attributeName="y" values="78;120;146;178;196;232;300;78" keyTimes="0;0.14;0.28;0.42;0.56;0.70;0.9;1" dur="8s" repeatCount="indefinite"/>
+        </rect>
+        <!-- steps -->
+        <line x1="80" y1="92" x2="256" y2="92" stroke="#1F3864" stroke-width="2" marker-end="url(#arrH)"/>
+        <text x="86" y="86" fill="#1F3864" font-size="11.5"><tspan font-weight="700">1.</tspan> POST /api/cases/42/escalate</text>
+        <line x1="260" y1="128" x2="260" y2="128" stroke="#1F3864" stroke-width="2"/>
+        <rect x="200" y="118" width="120" height="22" rx="6" fill="#F6ECD8" stroke="#E4C892"/><text x="260" y="133" text-anchor="middle" fill="#8A5A12" font-size="11">2. check login + role</text>
+        <line x1="260" y1="164" x2="436" y2="164" stroke="#1F3864" stroke-width="2" marker-end="url(#arrH)"/>
+        <text x="266" y="158" fill="#1F3864" font-size="11.5"><tspan font-weight="700">3.</tspan> escalate case 42</text>
+        <rect x="378" y="176" width="130" height="22" rx="6" fill="#fff" stroke="#1F3864"/><text x="443" y="191" text-anchor="middle" fill="#1F3864" font-size="11">4. is this move allowed?</text>
+        <line x1="440" y1="214" x2="611" y2="214" stroke="#1F3864" stroke-width="2" marker-end="url(#arrH)"/>
+        <text x="446" y="208" fill="#1F3864" font-size="11.5"><tspan font-weight="700">5.</tspan> update the case</text>
+        <line x1="440" y1="250" x2="746" y2="250" stroke="#1F3864" stroke-width="2" marker-end="url(#arrH)"/>
+        <text x="446" y="244" fill="#1F3864" font-size="11.5"><tspan font-weight="700">6.</tspan> write a log line</text>
+        <line x1="436" y1="286" x2="264" y2="286" stroke="#2F7D4F" stroke-width="2" marker-end="url(#arrH)" style="stroke:#2F7D4F"/>
+        <line x1="256" y1="320" x2="84" y2="320" stroke="#2F7D4F" stroke-width="2" marker-end="url(#arrH)" style="stroke:#2F7D4F"/>
+        <text x="270" y="280" fill="#2F7D4F" font-size="11.5">done</text>
+        <text x="90" y="314" fill="#2F7D4F" font-size="11.5"><tspan font-weight="700">7.</tspan> response: 200 OK — case is now Escalated</text>
+      </svg>
+      <figcaption>Every concept in this guide appears here: a REST request, the two security checks, the workflow rule, a database write through a repository, the log, and a status code back.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 10 -->
+  <section class="block" id="build">
+    <h2 class="sec"><span class="num">10</span>What&rsquo;s given, what to build</h2>
+    <p class="lead">Everything above is the <em>idea</em>. Here is the <em>deal</em>: a few pieces are handed to you so you don&rsquo;t waste time on plumbing, and the rest is yours to write. Build it in the order of the layers from &sect;4 &mdash; starting from the data layer you were given, then logic, then the web.</p>
+
+    <h3>Handed to you</h3>
+    <table>
+      <thead><tr><th style="width:230px">You already have</th><th>What it saves you</th></tr></thead>
+      <tbody>
+        <tr><td><strong>This guide</strong></td><td>Every concept the project uses, in the order you&rsquo;ll build them.</td></tr>
+        <tr><td><strong>A Spring Boot starter (data layer + generator)</strong></td><td>The <code>@Entity</code> classes and repositories are written for you; a generator builds the tables from them and fills them with realistic transactions &mdash; including planted fraud that trips every rule. You never hand-craft test data, and everyone starts from the same known state.</td></tr>
+        <tr><td><strong>The REST contract</strong></td><td>The exact addresses, methods, and status codes are fixed for you (&sect;3 and spec &sect;4.5). You implement them; you don&rsquo;t get to invent them.</td></tr>
+        <tr><td><strong>The rules &amp; the case map</strong></td><td>The four rules (&sect;7) and the legal case moves (&sect;8) are defined. Your job is to enforce them, not design them.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Yours to build</h3>
+    <p>Keep the three layers separate &mdash; that separation is itself part of the grade.</p>
+    <table>
+      <thead><tr><th style="width:230px">Layer</th><th>What you put in it</th></tr></thead>
+      <tbody>
+        <tr><td><span class="m">Data</span> &mdash; repositories</td><td>The only classes that touch the database &mdash; <code>JpaRepository</code> interfaces whose SQL Spring Data writes, parameterised by default. (Given in the starter.)</td></tr>
+        <tr><td><span class="m">Logic</span> &mdash; services</td><td>The <strong>rule engine</strong> that turns a saved transaction into an alert and a case, and the <strong>case workflow</strong> that allows only the moves on the &sect;8 map.</td></tr>
+        <tr><td><span class="m">Web</span> &mdash; controllers</td><td>The REST endpoints from spec &sect;4.5. They take the request, call a service, and send back JSON plus the right status code &mdash; no logic here.</td></tr>
+        <tr><td><span class="m">Security</span></td><td>Two server-side checks on every protected action: <strong>login</strong> (who are you?) then <strong>role</strong> (are you allowed?). See &sect;6.</td></tr>
+        <tr><td><span class="m">A screen</span></td><td>A simple page to list the cases and act on one &mdash; so a person can actually work the queue.</td></tr>
+        <tr><td><span class="m">The audit log</span></td><td>Every action writes one permanent line: who did what, to which case, when.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Definition of done</h3>
+    <p>You are finished when all of these are true &mdash; this is also how it&rsquo;s marked:</p>
+    <table>
+      <thead><tr><th>Check</th><th>What the marker does</th></tr></thead>
+      <tbody>
+        <tr><td>A transaction that breaks a rule opens a case</td><td>Loads the data, expects the planted fraud to become cases (R1&ndash;R3 required; <strong>R4 = bonus</strong>).</td></tr>
+        <tr><td>A case only moves along the &sect;8 arrows</td><td>Tries an illegal move and expects <span class="m">409</span>, not a silent change.</td></tr>
+        <tr><td>Roles are enforced</td><td>An analyst attempts an investigator-only action &rarr; <span class="m">403</span>; not logged in &rarr; <span class="m">401</span>.</td></tr>
+        <tr><td>No SQL injection</td><td>Confirms outside input is bound as a parameter (the repositories / a bound <code>@Query</code>), never glued into the query.</td></tr>
+        <tr><td>Everything is logged</td><td>Reads the audit log and sees one line per action.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="applies"><span class="tag">Start here</span>The <strong>data layer</strong> is given (the entities and repositories) &mdash; study it, then build the <strong>rule engine</strong> (prove it opens the right cases), wrap it in the <strong>REST endpoints</strong>, and add the two security checks last. Remember: the rule numbers live in the database (&sect;7) &mdash; never hard-code them.</div>
+  </section>
+
+  <!-- 11 -->
+  <section class="block" id="glossary">
+    <h2 class="sec"><span class="num">11</span>Quick glossary</h2>
+    <p class="lead">One line each, for when you forget a word halfway through building.</p>
+    <dl class="glossary">
+      <dt>Client</dt><dd>The program asking for something — here, the web browser.</dd>
+      <dt>Server</dt><dd>The program answering — your app, running on a computer.</dd>
+      <dt>HTTP</dt><dd>The set back-and-forth language the web uses: a request out, a response back.</dd>
+      <dt>Request / Response</dt><dd>&ldquo;Please do this&rdquo; / &ldquo;Here is the result, plus a status number.&rdquo;</dd>
+      <dt>API</dt><dd>The fixed list of actions one program lets another ask it to do.</dd>
+      <dt>REST API</dt><dd>A web API where addresses name the things and HTTP methods (GET, POST, PUT, DELETE) say what to do.</dd>
+      <dt>JSON</dt><dd>A simple text format of names and values used to send data back.</dd>
+      <dt>Status code</dt><dd>A 3-digit number on every response: 200 worked, 401 not logged in, 403 not allowed, 409 illegal move.</dd>
+      <dt>Layer / tier</dt><dd>A part of the app with one job: pages, logic, or database code.</dd>
+      <dt>MVC</dt><dd>Model (data), View (pages), Controller (handles requests) — the layers, by another name.</dd>
+      <dt>ORM</dt><dd>Object&ndash;Relational Mapping: lining up a class with a table, a field with a column, an object with a row.</dd>
+      <dt>JPA / Spring Data JPA</dt><dd>The standard (and Spring&rsquo;s helper) for storing objects in a database without writing SQL by hand.</dd>
+      <dt>Entity</dt><dd>A class marked <code>@Entity</code> that maps to a database table.</dd>
+      <dt>Repository</dt><dd>An interface that gives you database operations (save, find, delete) without an implementation you write.</dd>
+      <dt>Hibernate</dt><dd>The engine under JPA that actually writes the SQL and maps rows to objects.</dd>
+      <dt>Parameterised query</dt><dd>A query with its values passed in separately &mdash; safe from SQL injection; JPA does this for you.</dd>
+      <dt>Authentication</dt><dd>Checking <em>who you are</em> — the login.</dd>
+      <dt>Authorisation</dt><dd>Checking <em>what your role may do</em> — the permissions.</dd>
+      <dt>Rule engine</dt><dd>The simple checks that decide if a transaction is suspicious.</dd>
+      <dt>Alert</dt><dd>What a matched rule raises; it opens a case.</dd>
+      <dt>State machine</dt><dd>A thing that is always in one state, with only certain allowed moves between states — your case workflow.</dd>
+      <dt>Audit log</dt><dd>The permanent, unchangeable record of every action.</dd>
+    </dl>
+    <footer>CP3566 · Applied Java Programming — companion guide to the Fraud Case-Management Project specification.</footer>
+  </section>
+
+  </main>
+</div>
+
+</body>
+</html>
