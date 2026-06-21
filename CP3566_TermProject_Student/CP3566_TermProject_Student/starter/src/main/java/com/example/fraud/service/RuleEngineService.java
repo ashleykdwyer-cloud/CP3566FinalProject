@@ -63,13 +63,15 @@ public class RuleEngineService {
     public int scanAndOpenCases() {
         // 1. load the rules (thresholds) from ruleRepo into a Map keyed by rule code
         Map<String, Rule> rules = new HashMap<>();
+
         for (Rule r : ruleRepo.findAll()) {
             if (r != null && r.getCode() != null) {
                 rules.put(r.getCode(), r);
             }
         }
-        int opened = 0;
+
         List<Transaction> transactions = transactionRepo.findAll();
+        int opened = 0;
 
         // R1: large single amount
         Rule r1 = rules.get("R1");
@@ -148,43 +150,62 @@ public class RuleEngineService {
             }
         }
 
-        // R4: structuring (minCount transfers of $9000-$9999 within windowMinutes per account, bonus)
+        // R4: structuring (minCount transfers just under the limit within windowMinutes per account)
         Rule r4 = rules.get("R4");
-        if (r4 != null && r4.isEnabled() && r4.getMinCount() > 0) {
+
+        if (r4 != null
+                && r4.isEnabled()
+                && r4.getThresholdAmount() != null
+                && r4.getMinCount() > 0) {
+
             int windowMinutes = r4.getWindowMinutes();
             int minCount = r4.getMinCount();
-            BigDecimal lower = new BigDecimal("9000");
-            BigDecimal upper = new BigDecimal("9999");
 
-            // Group structuring transactions (9000-9999) by accountId
+            // Use the rules table threshold instead of hard-coding 9999/10000.
+            BigDecimal upper = r4.getThresholdAmount();
+            BigDecimal lower = upper.subtract(new BigDecimal("1000.00"));
+
             Map<Long, List<Transaction>> byAccount = new HashMap<>();
+
             for (Transaction t : transactions) {
-                if (t != null && t.getAccountId() != null && t.getOccurredAt() != null &&
-                        t.getAmount() != null && t.getAmount().compareTo(lower) >= 0 && t.getAmount().compareTo(upper) <= 0) {
+                if (t != null
+                        && t.getAccountId() != null
+                        && t.getOccurredAt() != null
+                        && t.getAmount() != null
+                        && t.getAmount().compareTo(lower) >= 0
+                        && t.getAmount().compareTo(upper) < 0) {
+
                     byAccount.computeIfAbsent(t.getAccountId(), k -> new ArrayList<>()).add(t);
                 }
             }
 
-            // Check each account for structuring violations
             for (Map.Entry<Long, List<Transaction>> entry : byAccount.entrySet()) {
                 List<Transaction> txns = entry.getValue();
-                // Sort by time
                 txns.sort((t1, t2) -> t1.getOccurredAt().compareTo(t2.getOccurredAt()));
 
-                // Check if any sliding window contains >= minCount structuring txns
                 boolean flagged = false;
+
                 for (int i = 0; i < txns.size() && !flagged; i++) {
                     LocalDateTime start = txns.get(i).getOccurredAt();
                     LocalDateTime end = start.plusMinutes(windowMinutes);
+
                     int count = 0;
+
                     for (Transaction t : txns) {
-                        if (!t.getOccurredAt().isBefore(start) && !t.getOccurredAt().isAfter(end)) {
+                        if (!t.getOccurredAt().isBefore(start)
+                                && !t.getOccurredAt().isAfter(end)) {
                             count++;
                         }
                     }
+
                     if (count >= minCount) {
-                        // open a case for this account using the first transaction's time
-                        String detail = count + " structuring transfers ($9000-$9999) in " + windowMinutes + " minute window";
+                        String detail = count
+                                + " transfers just under "
+                                + upper.toPlainString()
+                                + " in "
+                                + windowMinutes
+                                + " minute window";
+
                         openCase(txns.get(i).getId(), "R4", detail, start);
                         opened++;
                         flagged = true;
@@ -192,12 +213,11 @@ public class RuleEngineService {
                 }
             }
         }
+
         System.out.println("Cases opened: " + opened);
         return opened;
-
     }
-    
-    //   call openCase(...) for every hit, and count them.
+
     /**
      * Open one case for a transaction that tripped a rule.
      * @param transactionId the offending transaction's id
