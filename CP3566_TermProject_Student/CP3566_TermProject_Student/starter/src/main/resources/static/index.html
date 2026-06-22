@@ -48,7 +48,7 @@
             color: #e5e5b0;
         }
 
-        .staus {
+        .status {
             font-weight: bold;
         }
 
@@ -72,6 +72,7 @@
     <input id="password" type="password">
 
     <button onclick="login()">Login</button>
+    <button onclick="logout()">Logout</button>
 
     <p id="loginInfo">Not logged in</p>
 </div>
@@ -161,6 +162,24 @@
             "Logged in as " + data.username + " (" + data.role + ")";
 
         showMessage("Login successful");
+    }
+
+    function logout() {
+        currentUser = "";
+        currentPassword = "";
+        currentRole = "";
+        selectedCaseId = null;
+
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+
+        document.getElementById("loginInfo").innerText = "Not logged in";
+
+        document.getElementById("caseId").innerText = "";
+        document.getElementById("caseStatus").innerText = "";
+        document.getElementById("caseAssigned").innerText = "";
+
+        showMessage("Logged out");
     }
 
     async function loadCases() {
@@ -274,9 +293,8 @@
     }
 </script>
 
-</body>
-</html>
-</div>
+
+
 
 </body>
 </html>

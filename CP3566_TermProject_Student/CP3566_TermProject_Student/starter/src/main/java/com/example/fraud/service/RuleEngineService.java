@@ -226,6 +226,12 @@ public class RuleEngineService {
      * @param when          the timestamp to stamp the alert and case with
      */
     private void openCase(long transactionId, String ruleCode, String detail, LocalDateTime when) {
+
+       if (alertRepo.existsByTransactionIdAndRuleCode(transactionId, ruleCode)) {
+            // already an alert for this transaction and rule -> skip to avoid duplicates
+            return;
+        }
+
         // Save Alert
         Alert alert = new Alert(transactionId, ruleCode, detail, when);
         Alert savedAlert = alertRepo.save(alert);
