@@ -69,8 +69,8 @@ public class DataSeeder implements CommandLineRunner {
     private int transactionCount;
 
     // If a file with this name exists in the project folder, it is parsed and loaded instead of
-    // generating data. Your instructor gives the whole class the same fraud-data.xlsx.
-    @Value("${app.data-file:fraud-data.xlsx}")
+    // generating data. Your instructor gives the whole class the same fraud-data-backup.xlsx.
+    @Value("${app.data-file:fraud-data-backup.xlsx}")
     private String dataFile;
 
     private final DataSource dataSource;
@@ -111,7 +111,7 @@ public class DataSeeder implements CommandLineRunner {
         seedReference();
 
         // The transaction DATA comes from one of two places, on one batched JDBC connection:
-        //   - if fraud-data.xlsx (property app.data-file) exists in the project folder, parse + load
+        //   - if fraud-data-backup.xlsx (property app.data-file) exists in the project folder, parse + load
         //     THAT — your unique, instructor-supplied dataset — via ExcelDataLoader;
         //   - otherwise generate a sample dataset, so the project still runs out of the box.
         File excel = new File(dataFile);
@@ -128,7 +128,7 @@ public class DataSeeder implements CommandLineRunner {
                 int target   = transactionCount;
                 int accounts  = Math.max(50, Math.min(50_000, target / 200)); // ~200 transactions/account
                 System.out.printf("%nNo %s found - generating a sample dataset (~%,d transactions). "
-                        + "Drop your fraud-data.xlsx in this folder to use your own.%n", dataFile, target);
+                        + "Drop your fraud-data-backup.xlsx in this folder to use your own.%n", dataFile, target);
                 long[] ids = generateAccounts(con, accounts); con.commit();
                 int n = generateTransactions(con, ids, target); con.commit();
                 double genSec = (System.nanoTime() - t0) / 1e9;

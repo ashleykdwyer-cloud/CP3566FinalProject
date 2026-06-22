@@ -27,7 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * GIVEN code — reads the shared <b>fraud-data.xlsx</b> your instructor gives the class and loads it
+ * GIVEN code — reads the shared <b>fraud-data-backup.xlsx</b> your instructor gives the class and loads it
  * into the database. You do NOT edit this; it is the same kind of plumbing as the generator.
  *
  * It <b>streams</b> the workbook one row at a time (via excel-streaming-reader, which wraps Apache
@@ -116,7 +116,7 @@ public class ExcelDataLoader {
     private static void require(Map<String, Integer> col, String... names) {
         for (String n : names)
             if (!col.containsKey(n))
-                throw new IllegalStateException("fraud-data.xlsx is missing the '" + n + "' column. Expected: "
+                throw new IllegalStateException("fraud-data-backup.xlsx is missing the '" + n + "' column. Expected: "
                         + "account_no, holder_name, amount, currency, counterparty, country, occurred_at");
     }
 

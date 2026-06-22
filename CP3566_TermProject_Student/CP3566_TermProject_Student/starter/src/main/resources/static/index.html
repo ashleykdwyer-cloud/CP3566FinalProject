@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fraud Case Dashboard</title>
+    <style>
+        body {
+            font-family: "Arial Black", sans-serif;
+            margin: 25px;
+            background: lightgoldenrodyellow;
+        }
+
+        h1{
+            color: #1f3864;
+        }
+
+        .login, .case-list, .case-detail {
+            background: #e5e5b0;
+            padding:18px;
+            margin-bottom: 18px;
+            border-radius: 8px;
+            border: 1px solid #e5e5b0;
+        }
+
+        input, select, textarea, button {
+            margin: 5px;
+            padding: 8px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            background: #e5e5b0;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: #e5e5b0;
+            padding: 8px;
+        }
+
+        th {
+            background: #1f3864;
+            color: #e5e5b0;
+        }
+
+        .staus {
+            font-weight: bold;
+        }
+
+        #message {
+            font-weight: bold;
+            color: #153864;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Fraud Case Dashboard</h1>
+
+<div class="login">
+    <h2>Login</h2>
+
+    <label>Username:</label>
+    <input id="username" type="text">
+
+    <label>Password:</label>
+    <input id="password" type="password">
+
+    <button onclick="login()">Login</button>
+
+    <p id="loginInfo">Not logged in</p>
+</div>
+
+<div class="case-list">
+    <h2>Cases</h2>
+    <button onclick="loadCases()">Load Cases</button>
+    <button onclick="scanRules()">Run Rule Scan</button>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Alert ID</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Opened At</th>
+            <th>Open</th>
+        </tr>
+        </thead>
+        <tbody id="casesBody"></tbody>
+    </table>
+</div>
+
+<div class="case-detail">
+    <h2>Selected Case</h2>
+
+    <p>ID: <span id="caseId"></span></p>
+    <p>Status: <span id="caseStatus" class="status"></span></p>
+    <p>Assigned To: <span id="caseAssigned"></span></p>
+
+    <button onclick="caseAction('pickup')">Pickup</button>
+    <button onclick="caseAction('escalate')">Escalate</button>
+    <button onclick="caseAction('send-back')">Send Back</button>
+    <button onclick="caseAction('close-false')">Close False</button>
+    <button onclick="caseAction('close-fraud')">Close Fraud</button>
+
+    <h3>Add Note</h3>
+    <textarea id="noteText" rows="3" cols="60" placeholder="Enter note here"></textarea>
+    <br>
+    <button onclick="addNote()">Add Note</button>
+</div>
+
+<p id="message"></p>
+
+<script>
+    let currentUser = "";
+    let currentPassword = "";
+    let currentRole = "";
+    let selectedCaseId = null;
+
+    function showMessage(text) {
+        document.getElementById("message").innerText = text;
+    }
+
+    function authHeaders() {
+        return {
+            "X-Username": currentUser,
+            "X-Password": currentPassword,
+            "Content-Type": "application/json"
+        };
+    }
+
+    async function login() {
+        currentUser = document.getElementById("username").value;
+        currentPassword = document.getElementById("password").value;
+
+        const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                username: currentUser,
+                password: currentPassword
+            })
+        });
+
+        if (!response.ok) {
+            document.getElementById("loginInfo").innerText = "Login failed";
+            showMessage("Login failed: " + response.status);
+            return;
+        }
+
+        const data = await response.json();
+        currentRole = data.role;
+
+        document.getElementById("loginInfo").innerText =
+            "Logged in as " + data.username + " (" + data.role + ")";
+
+        showMessage("Login successful");
+    }
+
+    async function loadCases() {
+        const response = await fetch("/api/cases");
+
+        if (!response.ok) {
+            showMessage("Could not load cases: " + response.status);
+            return;
+        }
+
+        const cases = await response.json();
+        const body = document.getElementById("casesBody");
+        body.innerHTML = "";
+
+        cases.forEach(c => {
+            const row = document.createElement("tr");
+
+            row.innerHTML =
+                "<td>" + c.id + "</td>" +
+                "<td>" + c.alertId + "</td>" +
+                "<td>" + c.status + "</td>" +
+                "<td>" + (c.assignedTo || "") + "</td>" +
+                "<td>" + c.openedAt + "</td>" +
+                "<td><button onclick='openCase(" + c.id + ")'>Open</button></td>";
+
+            body.appendChild(row);
+        });
+
+        showMessage("Loaded " + cases.length + " cases");
+    }
+
+    async function openCase(id) {
+        const response = await fetch("/api/cases/" + id);
+
+        if (!response.ok) {
+            showMessage("Could not open case: " + response.status);
+            return;
+        }
+
+        const c = await response.json();
+        selectedCaseId = c.id;
+
+        document.getElementById("caseId").innerText = c.id;
+        document.getElementById("caseStatus").innerText = c.status;
+        document.getElementById("caseAssigned").innerText = c.assignedTo || "";
+
+        showMessage("Opened case " + c.id);
+    }
+
+    async function caseAction(action) {
+        if (selectedCaseId == null) {
+            showMessage("Select a case first");
+            return;
+        }
+
+        const response = await fetch("/api/cases/" + selectedCaseId + "/" + action, {
+            method: "POST",
+            headers: authHeaders()
+        });
+
+        if (!response.ok) {
+            showMessage("Action failed: " + response.status);
+            return;
+        }
+
+        const c = await response.json();
+
+        document.getElementById("caseStatus").innerText = c.status;
+        document.getElementById("caseAssigned").innerText = c.assignedTo || "";
+
+        showMessage("Action complete: " + action);
+        loadCases();
+    }
+
+    async function addNote() {
+        if (selectedCaseId == null) {
+            showMessage("Select a case first");
+            return;
+        }
+
+        const note = document.getElementById("noteText").value;
+
+        const response = await fetch("/api/cases/" + selectedCaseId + "/notes", {
+            method: "POST",
+            headers: authHeaders(),
+            body: JSON.stringify({note: note})
+        });
+
+        if (!response.ok) {
+            showMessage("Note failed: " + response.status);
+            return;
+        }
+
+        document.getElementById("noteText").value = "";
+        showMessage("Note added");
+    }
+
+    async function scanRules() {
+        const response = await fetch("/api/rules/scan", {
+            method: "POST"
+        });
+
+        if (!response.ok) {
+            showMessage("Scan failed: " + response.status);
+            return;
+        }
+
+        const data = await response.json();
+        showMessage("Scan complete. Cases opened: " + data.casesOpened);
+        loadCases();
+    }
+</script>
+
+</body>
+</html>
+</div>
+
+</body>
+</html>

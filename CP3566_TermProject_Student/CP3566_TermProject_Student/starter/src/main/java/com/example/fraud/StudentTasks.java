@@ -9,9 +9,9 @@ package com.example.fraud;
  *   - com.example.fraud.model   the 8 @Entity classes  -> Hibernate creates the tables
  *   - com.example.fraud.repo    the 8 JpaRepository interfaces (CRUD for free)
  *   - com.example.fraud.seed.DataSeeder   connects, creates the tables, and loads the data into
- *                                         accounts + transactions (your instructor's fraud-data.xlsx
+ *                                         accounts + transactions (your instructor's fraud-data-backup.xlsx
  *                                         if present, else a generated sample with planted fraud)
- *   - com.example.fraud.seed.ExcelDataLoader  parses the supplied fraud-data.xlsx (given)
+ *   - com.example.fraud.seed.ExcelDataLoader  parses the supplied fraud-data-backup.xlsx (given)
  *
  * So when you run the starter, the database is populated BUT the alerts, cases and
  * audit_log tables are EMPTY. Turning the planted fraud into the 16 cases — and
