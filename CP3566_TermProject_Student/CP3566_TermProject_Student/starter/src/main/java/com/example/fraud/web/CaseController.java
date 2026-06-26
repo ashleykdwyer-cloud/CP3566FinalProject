@@ -34,7 +34,13 @@ public class CaseController {
     }
 
     @GetMapping
-    public List<Case> listCases(@RequestParam(required = false) String status) {
+    public List<Case> listCases(
+            @RequestParam(required = false) String status,
+            @RequestHeader("X-Username") String username,
+            @RequestHeader("X-Password") String password) {
+
+        auth.requireLogin(username, password);
+
         if (status == null || status.isBlank()) {
             return caseRepo.findAll();
         }
@@ -43,11 +49,17 @@ public class CaseController {
     }
 
     @GetMapping("/{id}")
-    public Case getCase(@PathVariable Long id) {
+    public Case getCase(
+            @PathVariable Long id,
+            @RequestHeader("X-Username") String username,
+            @RequestHeader("X-Password") String password) {
+
+        auth.requireLogin(username, password);
+
         return caseRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Case not found"));
+                        HttpStatus.NOT_FOUND,
+                        "Case not found"));
     }
 
     @PostMapping("/{id}/pickup")

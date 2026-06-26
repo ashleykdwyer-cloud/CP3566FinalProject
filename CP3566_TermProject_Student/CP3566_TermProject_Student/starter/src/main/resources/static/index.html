@@ -183,7 +183,9 @@
     }
 
     async function loadCases() {
-        const response = await fetch("/api/cases");
+        const response = await fetch("/api/cases", {
+            headers: authHeaders()
+        });
 
         if (!response.ok) {
             showMessage("Could not load cases: " + response.status);
@@ -212,7 +214,9 @@
     }
 
     async function openCase(id) {
-        const response = await fetch("/api/cases/" + id);
+        const response = await fetch("/api/cases/" + id, {
+            headers: authHeaders()
+        });
 
         if (!response.ok) {
             showMessage("Could not open case: " + response.status);
@@ -279,7 +283,8 @@
 
     async function scanRules() {
         const response = await fetch("/api/rules/scan", {
-            method: "POST"
+            method: "POST",
+            headers: authHeaders()
         });
 
         if (!response.ok) {

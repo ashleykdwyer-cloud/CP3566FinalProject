@@ -81,8 +81,9 @@ public class RuleEngineService {
                 if (t != null && t.getAmount() != null && t.getAmount().compareTo(threshold) >= 0) {
                     String detail = "amount " + t.getAmount().toPlainString() + " >= " + threshold.toPlainString();
                     LocalDateTime when = t.getOccurredAt() != null ? t.getOccurredAt() : LocalDateTime.now();
-                    openCase(t.getId(), "R1", detail, when);
-                    opened++;
+                    if (openCase(t.getId(), "R1", detail, when)) {
+                        opened++;
+                    }
                 }
             }
         }
@@ -101,8 +102,9 @@ public class RuleEngineService {
                             watchNames.contains(t.getCounterparty().trim().toLowerCase())) {
                         String detail = "counterparty " + t.getCounterparty() + " on watchlist";
                         LocalDateTime when = t.getOccurredAt() != null ? t.getOccurredAt() : LocalDateTime.now();
-                        openCase(t.getId(), "R3", detail, when);
-                        opened++;
+                        if (openCase(t.getId(), "R3", detail, when)) {
+                            opened++;
+                        }
                     }
                 }
             }
@@ -142,8 +144,9 @@ public class RuleEngineService {
                     if (count >= minCount) {
                         // open a case for this account using the first transaction's time
                         String detail = count + " transactions in " + windowMinutes + " minute window";
-                        openCase(txns.get(i).getId(), "R2", detail, start);
-                        opened++;
+                        if (openCase(txns.get(i).getId(), "R2", detail, start)) {
+                            opened++;
+                        }
                         flagged = true;
                     }
                 }
@@ -206,8 +209,9 @@ public class RuleEngineService {
                                 + windowMinutes
                                 + " minute window";
 
-                        openCase(txns.get(i).getId(), "R4", detail, start);
-                        opened++;
+                        if (openCase(txns.get(i).getId(), "R4", detail, start)) {
+                            opened++;
+                        }
                         flagged = true;
                     }
                 }
@@ -225,24 +229,30 @@ public class RuleEngineService {
      * @param detail        a short, human-readable reason
      * @param when          the timestamp to stamp the alert and case with
      */
-    private void openCase(long transactionId, String ruleCode, String detail, LocalDateTime when) {
+    private boolean openCase(long transactionId, String ruleCode,
+                             String detail, LocalDateTime when) {
 
-       if (alertRepo.existsByTransactionIdAndRuleCode(transactionId, ruleCode)) {
-            // already an alert for this transaction and rule -> skip to avoid duplicates
-            return;
+        if (alertRepo.existsByTransactionIdAndRuleCode(transactionId, ruleCode)) {
+            return false;
         }
 
-        // Save Alert
         Alert alert = new Alert(transactionId, ruleCode, detail, when);
         Alert savedAlert = alertRepo.save(alert);
 
-        // Save Case linked to the Alert, status = "NEW", unassigned (null)
         Case c = new Case(savedAlert.getId(), "NEW", null, when);
         Case savedCase = caseRepo.save(c);
 
-        // Record audit log: system opened a case for this rule
-        AuditLog log = new AuditLog("system", "OPEN_CASE", "case", savedCase.getId(),
-                "Rule " + ruleCode + ": " + detail, when);
+        AuditLog log = new AuditLog(
+                "system",
+                "OPEN_CASE",
+                "case",
+                savedCase.getId(),
+                "Rule " + ruleCode + ": " + detail,
+                when
+        );
+
         auditLogRepo.save(log);
+
+        return true;
     }
 }

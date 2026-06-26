@@ -28,12 +28,23 @@ public class RuleController {
     }
 
     @GetMapping
-    public List<Rule> getRules() {
+    public List<Rule> getRules(
+            @RequestHeader("X-Username") String username,
+            @RequestHeader("X-Password") String password) {
+
+        auth.requireLogin(username, password);
+
         return ruleRepo.findAll();
     }
 
     @PostMapping("/scan")
-    public Map<String, Object> scanRules() {
+    public Map<String, Object> scanRules(
+            @RequestHeader("X-Username") String username,
+            @RequestHeader("X-Password") String password) {
+
+        User user = auth.requireLogin(username, password);
+        auth.requireRole(user, "ADMIN");
+
         int opened = ruleEngineService.scanAndOpenCases();
 
         return Map.of(
