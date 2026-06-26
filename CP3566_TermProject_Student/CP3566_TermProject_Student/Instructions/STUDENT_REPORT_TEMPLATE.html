@@ -29,7 +29,7 @@
   h2{font-family:var(--serif);color:var(--navy);font-size:18px;margin:0 0 2px}
   .ask{color:#8A5A12;font-size:13.5px;margin:0 0 6px}
   .ask::before{content:"✎ ";}
-  .write{border:1px dashed #cdc3ad;border-radius:8px;min-height:64px;padding:8px 10px;color:#b9b1a0;font-size:13px}
+  .write{border:1px dashed #cdc3ad;border-radius:8px;min-height:64px;padding:8px 10px;color:#1d1c1b;font-size:13px}
   footer{border-top:1px solid var(--line);margin-top:10px;padding-top:12px;color:var(--muted);font-family:var(--mono);font-size:12px}
   @page{size:letter;margin:16mm}
   @media print{
@@ -59,46 +59,70 @@
   </div>
 
   <div class="meta">
-    <div class="k">Name</div><div class="blank"></div>
-    <div class="k">Student ID</div><div class="blank"></div>
-    <div class="k">Date</div><div class="blank"></div>
-    <div class="k">Class</div><div class="blank"></div>
+    <div class="k">Name</div> Ashley Dwyer
+    <div class="k">Student ID</div> 20037535
+    <div class="k">Date</div> June 22nd, 2026
+    <div class="k">Class</div> CP3566
   </div>
 
   <section>
     <h2>1 · What does your project do?</h2>
     <p class="ask">In two or three sentences: what problem does the system solve, and who would use it? (Think: a bank wants to catch suspicious money transfers.)</p>
-    <div class="write">Write here…</div>
+    <div class="write">This system would help a bank detect any suspicious transctions that could be the sign of fraud or money 
+                      laundering. It would be used by bank employees such as administators or investigators.
+    </div>
   </section>
 
   <section>
     <h2>2 · How does it work, from start to finish?</h2>
     <p class="ask">Tell the story of one suspicious transaction: it arrives, the system notices something is off, it opens a &ldquo;case,&rdquo; a person reviews it, and the case ends up closed. Walk through it in order, in plain words.</p>
-    <div class="write">Write here…</div>
+    <div class="write">First, a transaction is loaded in the system and stored in the database. When the rule engine runs, it scans all 
+                      the transactions and checks them against the rules. If there is a match between a transaction and a rule, the system will
+                      create an alert and automatically open a case for investigation. An analyst with the bank will review cases as they are populated
+                      and they decide whether to close the case or escalate it to the investigator. It is then the investigator's job to decide if it is fraud. 
+    </div>
   </section>
 
   <section>
     <h2>3 · What are the main parts, in everyday terms?</h2>
     <p class="ask">Describe the pieces without technical names: the place everything is stored, the part that checks for suspicious activity, the screen people use, and the sign-in. One sentence each — use an analogy if it helps.</p>
-    <div class="write">Write here…</div>
+    <div class="write">Storage: The storage part is similar to a filing cabinet where all transactions, cases, users, and investigation records are kept. A database.
+                       The Activity Checker: This part is the security guard that is constantly scanning and watching every transaction to keep an eye on anything suspicious.
+                       The Screen: The screen is the dashboard that allows employees to log in and review the cases, add notes, escalate cases, or close them. 
+                       The Sign-in: The sign-in is the security checkpoint that only allows those who are authorized to have access to the system checking the transactions. 
+                       It also only allows the analyst access to certain functions and the investigator access to all functions. 
+    </div>
   </section>
 
   <section>
     <h2>4 · What makes a transaction look suspicious?</h2>
     <p class="ask">Explain the checks your system makes in plain language — for example &ldquo;a very large amount,&rdquo; &ldquo;too many transfers too quickly,&rdquo; or &ldquo;sending money to a flagged name.&rdquo; Why does each one matter?</p>
-    <div class="write">Write here…</div>
+    <div class="write">One of the suspicious activity checks the system makes is looking for large money transfers, ones that exceeds the limit set by the bank. Large money transfers can be 
+                       a sign of money laundering or fraud. 
+                       Another check is looking for too many transactions in a short time period on the same account. This can be a sign of scammers gaining access to an account and trying
+                       to move money out as quickly as possible, without being too suspicious.
+    </div>
   </section>
 
   <section>
     <h2>5 · Who uses it, and how does a case move along?</h2>
     <p class="ask">Describe the people (e.g. an analyst, an investigator) and what each is allowed to do. Then describe the stages a case passes through and who moves it from one stage to the next.</p>
-    <div class="write">Write here…</div>
+    <div class="write">The system is mainly used by analysts, investigators, and administrators. Analysts review new cases by picking them up, looking at the details, and deciding whether the case should be closed as a false alarm or escalated for further review. Investigators review escalated cases and decide whether the activity is actually fraud or not.
+
+                       A case starts as NEW when the system finds a suspicious transaction. An analyst picks up the case and it moves to REVIEWING. If the analyst thinks it needs more attention, they escalate it to ESCALATED. The investigator then reviews the escalated case and either closes it as CLOSED_FALSE if it is not fraud, or CLOSED_FRAUD if fraud is confirmed.                    
+                    </div>
   </section>
 
   <section>
     <h2>6 · What was hard, and what would you improve?</h2>
     <p class="ask">Be honest: what part was tricky to get working, and if you had another week, what is the one thing you&rsquo;d add or make better?</p>
-    <div class="write">Write here…</div>
+    <div class="write">The part that was most difficult for me was implementing the case workflow and making sure that only the correct users could perform
+                      certain actions. It took some testing to make sure the status changes were valid and that analysts and investigators had the correct permissions for each step.
+
+                      If I had more time to work on the project, I would improve the UI by adding more detailed case information and making the dashboard easier to use and cleaner
+                      looking. I would do this by adding filters, search options and creating a login page that does not show what the
+                      system does until it is logged in correctly.
+    </div>
   </section>
 
   <footer>CP3566 · Term Project — plain-language report · keep it to 3 pages.</footer>
